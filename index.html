@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Controle de Dispositivos</title>
+  <style>
+    :root {
+      --rosa: #e16d6d; /* e16d6d */
+      --verde: rgb(1,109,109); /* rgb 1 109 109 */
+      --bg: #0f1216;
+      --card: #151a21;
+      --text: #eaeff5;
+      --muted: #9fb0bf;
+      --ok: #31d0aa;
+      --warn: #ffcc66;
+      --danger: #ff6b6b;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: radial-gradient(1200px 600px at 85% -10%, rgba(225,109,109,.25), transparent 60%),
+                  radial-gradient(900px 500px at -10% 10%, rgba(1,109,109,.20), transparent 60%),
+                  var(--bg);
+    }
+
+    /* Header */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(8px);
+      background: linear-gradient(90deg, rgba(225,109,109,.18), rgba(1,109,109,.18));
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+    .brand {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .logo {
+      width: 42px; height: 42px; border-radius: 12px;
+      background: linear-gradient(135deg, var(--rosa), var(--verde));
+      box-shadow: var(--shadow);
+      animation: float 5s ease-in-out infinite;
+    }
+    @keyframes float { 0%,100%{ transform: translateY(0)} 50%{ transform: translateY(-4px)} }
+
+    h1.title { margin: 0; letter-spacing: .3px; }
+    nav { display: flex; gap: 12px; align-items: center; }
+    .actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn {
+      border: 0; padding: 10px 14px; border-radius: 12px; cursor: pointer;
+      color: white; font-weight: 600; letter-spacing: .3px;
+      background: linear-gradient(135deg, var(--rosa), var(--verde));
+      box-shadow: 0 8px 20px rgba(225,109,109,.25), 0 8px 20px rgba(1,109,109,.25);
+      transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease;
+    }
+    .btn:hover { transform: translateY(-1px) scale(1.01); }
+    .btn:active { transform: translateY(0) scale(.98); opacity: .95; }
+    .btn.ghost { background: transparent; border: 1px solid rgba(255,255,255,.15); box-shadow: none; }
+
+    /* Cards */
+    .grid {
+      display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 18px;
+    }
+    @media (min-width: 960px){ .grid { grid-template-columns: 1.1fr .9fr; } }
+
+    .card { background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.005)); border: 1px solid rgba(255,255,255,.06); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; }
+    .card-header { padding: 16px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,.06); }
+    .card-header h2 { margin: 0; font-size: 18px; }
+    .card-body { padding: 18px; }
+
+    /* Form */
+    form .row { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    @media (min-width: 720px){ form .row { grid-template-columns: repeat(2, 1fr); } }
+    label { font-size: 13px; color: var(--muted); }
+    input, select, textarea {
+      width: 100%; padding: 12px 12px; border-radius: 12px; outline: none;
+      background: #0f1319; color: var(--text);
+      border: 1px solid rgba(255,255,255,.09);
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--rosa); box-shadow: 0 0 0 3px rgba(225,109,109,.15); }
+
+    /* Toolbar */
+    .toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .toolbar input[type="search"]{ max-width: 280px; }
+    .tag { font-size: 12px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); }
+
+    /* Table */
+    .table-wrap { overflow: auto; border-radius: 14px; border: 1px solid rgba(255,255,255,.06); }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      position: sticky; top: 0; z-index: 5; font-size: 13px; text-align: left; padding: 12px 14px; letter-spacing: .3px;
+      background: linear-gradient(90deg, var(--rosa), var(--verde)); color: #0b0f12;
+    }
+    tbody td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,.06); font-size: 14px; }
+    tbody tr { transition: background-color .2s ease; }
+    tbody tr:hover { background: rgba(255,255,255,.03); }
+
+    .pill { padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: .3px; }
+    .tipo-Tablet { background: rgba(225,109,109,.18); color: #ffdede; border: 1px solid rgba(225,109,109,.45); }
+    .tipo-Notebook { background: rgba(1,109,109,.18); color: #c7fffb; border: 1px solid rgba(1,109,109,.45); }
+    .tipo-Chromebook { background: rgba(255,255,255,.08); color: #f1f8ff; border: 1px solid rgba(255,255,255,.2); }
+
+    .qty { font-weight: 800; }
+    .qty.ok { color: var(--ok); }
+    .qty.low { color: var(--warn); }
+    .qty.none { color: var(--danger); }
+
+    .row-actions { display: flex; gap: 8px; }
+    .icon-btn { border: 0; background: rgba(255,255,255,.06); color: white; padding: 8px 10px; border-radius: 10px; cursor: pointer; transition: transform .15s ease, background .2s ease; }
+    .icon-btn:hover { transform: translateY(-1px); background: rgba(255,255,255,.12); }
+
+    /* Footer */
+    footer { margin-top: 28px; }
+    .footer-inner {
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+      padding: 18px 20px; border-top: 1px solid rgba(255,255,255,.06);
+      background: linear-gradient(90deg, rgba(225,109,109,.08), rgba(1,109,109,.08));
+    }
+    .credits { color: var(--muted); font-size: 14px; }
+
+    /* Modal */
+    dialog { width: min(560px, 92vw); border: 1px solid rgba(255,255,255,.12); background: #0f1319; color: var(--text); border-radius: 16px; box-shadow: var(--shadow); }
+    dialog::backdrop { background: rgba(0,0,0,.55); backdrop-filter: blur(3px); animation: fadeIn .2s ease; }
+    @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+
+    /* Toast */
+    .toast { position: fixed; right: 18px; bottom: 18px; display: grid; gap: 8px; z-index: 9999; }
+    .toast .msg { padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); box-shadow: var(--shadow); animation: slideUp .25s ease; }
+    @keyframes slideUp { from { transform: translateY(8px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+
+    /* Scroll-to-top */
+    #toTop { position: fixed; right: 18px; bottom: 90px; display: none; }
+
+    /* Reveal effects */
+    .reveal { opacity: 0; transform: translateY(8px); transition: all .5s ease; }
+    .reveal.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
+      <div class="brand">
+       
+        <h1 class="title">Controle de Dispositivos</h1>
+      </div>
+      <nav class="actions">
+        <button class="btn" onclick="document.querySelector('#novo').scrollIntoView({behavior:'smooth'})">Cadastrar</button>
+        <button class="btn ghost" onclick="document.querySelector('#lista').scrollIntoView({behavior:'smooth'})">Ver Lista</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="resumo" class="grid reveal">
+      <div class="card">
+        <div class="card-header"><h2>Cadastro rápido</h2></div>
+        <div class="card-body">
+          <form id="formCadastro">
+            <div class="row">
+              <div>
+                <label for="tipo">Tipo de dispositivo</label>
+                <select id="tipo" required>
+                  <option value="Tablet">Tablet</option>
+                  <option value="Notebook">Notebook</option>
+                  <option value="Chromebook">Chromebook</option>
+                </select>
+              </div>
+              <div>
+                <label for="serie">Série/Turma</label>
+                <input id="serie" placeholder="Ex.: 3º C" required />
+              </div>
+              <div>
+                <label for="prof">Professor responsável</label>
+                <input id="prof" placeholder="Nome do(a) professor(a)" required />
+              </div>
+              <div>
+                <label for="quantidade">Quantidade</label>
+                <input id="quantidade" type="number" min="1" step="1" placeholder="Ex.: 15" required />
+              </div>
+              <div style="grid-column: 1 / -1;">
+                <label for="obs">Observações (opcional)</label>
+                <textarea id="obs" rows="2" placeholder="Horario, dia, etc..."></textarea>
+              </div>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:12px;">
+              <button type="submit" class="btn">Salvar dispositivo</button>
+              <button type="button" class="btn ghost" id="limpar">Limpar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>Filtros & ações</h2></div>
+        <div class="card-body">
+          <div class="toolbar">
+            <input type="search" id="busca" placeholder="Pesquisar por série, prof., tipo…" />
+            <select id="filtroTipo">
+              <option value="">Todos os tipos</option>
+              <option>Tablet</option>
+              <option>Notebook</option>
+              <option>Chromebook</option>
+            </select>
+            <select id="ordenar">
+              <option value="createdAt_desc">Mais recentes</option>
+              <option value="createdAt_asc">Mais antigos</option>
+              <option value="tipo_asc">Tipo (A→Z)</option>
+              <option value="serie_asc">Série (A→Z)</option>
+              <option value="prof_asc">Professor (A→Z)</option>
+            </select>
+            <span class="tag" id="totalResumo">0 itens</span>
+            <button class="btn ghost" id="exportar">Exportar .JSON</button>
+            <input type="file" id="importar" accept="application/json" style="display:none" />
+            <button class="btn ghost" onclick="document.querySelector('#importar').click()">Importar</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="lista" class="reveal" style="margin-top:10px;">
+      <div class="card">
+        <div class="card-header">
+          <h2>Dispositivos cadastrados</h2>
+          <small class="muted">Cabeçalho da tabela com cores <b>#e16d6d</b> e <b>rgb(1,109,109)</b>.</small>
+        </div>
+        <div class="card-body">
+          <div class="table-wrap">
+            <table id="tabela">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Série/Turma</th>
+                  <th>Professor</th>
+                  <th>Qtde Total</th>
+                  <th>Disponível</th>
+                  <th>Observações</th>
+                  <th style="width:200px">Ações</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <button id="toTop" class="btn" title="Voltar ao topo" onclick="window.scrollTo({top:0,behavior:'smooth'})">▲ Topo</button>
+  </main>
+
+  <footer>
+    <div class="footer-inner container">
+      <div class="credits">&copy; 2025 desenvolvido por <strong>Gabriel G&amp;M</strong>.</div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn ghost" onclick="limparTudo()">Limpar TUDO</button>
+        <a class="btn" href="#novo" onclick="document.querySelector('#formCadastro').scrollIntoView({behavior:'smooth'})">Novo cadastro</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal de reserva -->
+  <dialog id="modalReserva">
+    <form method="dialog" id="formReserva">
+      <div class="card-header" style="border:0; padding:16px 18px;">
+        <h2 style="margin:0">Reservar dispositivos</h2>
+      </div>
+      <div class="card-body" style="padding-top:0">
+        <input type="hidden" id="reservaDeviceId" />
+        <div class="row">
+          <div>
+            <label for="reservaProf">Professor</label>
+            <input id="reservaProf" required />
+          </div>
+          <div>
+            <label for="reservaTurma">Série/Turma</label>
+            <input id="reservaTurma" required />
+          </div>
+          <div>
+            <label for="reservaQtd">Quantidade</label>
+            <input type="number" id="reservaQtd" min="1" step="1" required />
+          </div>
+          <div>
+            <label for="reservaData">Data</label>
+            <input type="date" id="reservaData" required />
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; padding:0 18px 16px 18px;">
+        <button class="btn ghost" value="cancel">Cancelar</button>
+        <button class="btn" id="confirmarReserva" value="default">Confirmar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /*** Persistência ***/
+    const STORAGE_KEY = 'controle_dispositivos_v1';
+    const RESERVAS_KEY = 'controle_dispositivos_reservas_v1';
+
+    const state = {
+      itens: [], // {id, tipo, serie, prof, qtdTotal, qtdDisp, obs, createdAt}
+      reservas: [] // {id, deviceId, prof, turma, qtd, data, status}
+    };
+
+    const el = {
+      tbody: document.querySelector('#tabela tbody'),
+      totalResumo: document.querySelector('#totalResumo'),
+      busca: document.querySelector('#busca'),
+      filtroTipo: document.querySelector('#filtroTipo'),
+      ordenar: document.querySelector('#ordenar'),
+
+      form: document.querySelector('#formCadastro'),
+      tipo: document.querySelector('#tipo'),
+      serie: document.querySelector('#serie'),
+      prof: document.querySelector('#prof'),
+      quantidade: document.querySelector('#quantidade'),
+      obs: document.querySelector('#obs'),
+
+      modal: document.querySelector('#modalReserva'),
+      reservaDeviceId: document.querySelector('#reservaDeviceId'),
+      reservaProf: document.querySelector('#reservaProf'),
+      reservaTurma: document.querySelector('#reservaTurma'),
+      reservaQtd: document.querySelector('#reservaQtd'),
+      reservaData: document.querySelector('#reservaData'),
+
+      toast: document.querySelector('#toast'),
+      toTop: document.getElementById('toTop'),
+    };
+
+    function uid(){ return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+
+    function load(){
+      try { state.itens = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { state.itens = []; }
+      try { state.reservas = JSON.parse(localStorage.getItem(RESERVAS_KEY)) || []; } catch { state.reservas = []; }
+    }
+    function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.itens)); localStorage.setItem(RESERVAS_KEY, JSON.stringify(state.reservas)); }
+
+    /*** UI helpers ***/
+    function notify(text){
+      const div = document.createElement('div'); div.className = 'msg'; div.textContent = text;
+      el.toast.appendChild(div); setTimeout(()=>{ div.remove(); }, 3200);
+    }
+
+    function qtyClass(n){ if(n <= 0) return 'none'; if(n <= 3) return 'low'; return 'ok'; }
+
+    function render(){
+      // filtros
+      const q = (el.busca.value || '').trim().toLowerCase();
+      const tipoFilter = el.filtroTipo.value;
+      const [key, dir] = el.ordenar.value.split('_');
+
+      let rows = [...state.itens];
+      if(q){ rows = rows.filter(it => (it.tipo+it.serie+it.prof+(it.obs||'')).toLowerCase().includes(q)); }
+      if(tipoFilter){ rows = rows.filter(it => it.tipo === tipoFilter); }
+      rows.sort((a,b)=>{
+        if(key === 'createdAt') return (dir==='desc'? b.createdAt - a.createdAt : a.createdAt - b.createdAt);
+        const av = (a[key]||'').toString().toLowerCase(); const bv = (b[key]||'').toString().toLowerCase();
+        return dir==='asc' ? av.localeCompare(bv) : bv.localeCompare(av);
+      });
+
+      // tabela
+      el.tbody.innerHTML = rows.map(it=>{
+        const tipoClass = `tipo-${it.tipo}`;
+        const qClass = qtyClass(it.qtdDisp);
+        return `<tr>
+          <td><span class="pill ${tipoClass}">${it.tipo}</span></td>
+          <td>${it.serie}</td>
+          <td>${it.prof}</td>
+          <td class="qty">${it.qtdTotal}</td>
+          <td class="qty ${qClass}">${it.qtdDisp}</td>
+          <td>${it.obs? it.obs.replace(/</g,'&lt;') : '-'}</td>
+          <td>
+            <div class="row-actions">
+              <button class="icon-btn" title="Reservar" onclick="abrirReserva('${it.id}')">📅 Reservar</button>
+              <button class="icon-btn" title="Editar" onclick="editarItem('${it.id}')">✏️ Editar</button>
+              <button class="icon-btn" title="Excluir" onclick="excluirItem('${it.id}')">🗑️ Excluir</button>
+            </div>
+          </td>
+        </tr>`
+      }).join('');
+
+      el.totalResumo.textContent = `${rows.length} item${rows.length===1?'':'s'}`;
+    }
+
+    /*** CRUD ***/
+    function adicionar(e){
+      e.preventDefault();
+      const item = {
+        id: uid(),
+        tipo: el.tipo.value,
+        serie: el.serie.value.trim(),
+        prof: el.prof.value.trim(),
+        qtdTotal: Math.max(1, parseInt(el.quantidade.value,10)||1),
+        qtdDisp: Math.max(1, parseInt(el.quantidade.value,10)||1),
+        obs: el.obs.value.trim(),
+        createdAt: Date.now()
+      };
+      state.itens.push(item); save(); render(); notify('Dispositivo salvo com sucesso!'); el.form.reset(); el.tipo.value = 'Tablet';
+    }
+
+    function editarItem(id){
+      const it = state.itens.find(x=>x.id===id); if(!it) return;
+      el.tipo.value = it.tipo; el.serie.value = it.serie; el.prof.value = it.prof; el.quantidade.value = it.qtdTotal; el.obs.value = it.obs||'';
+      // Ao salvar, substituir o existente
+      state.itens = state.itens.filter(x=>x.id!==id);
+      save(); render();
+      notify('Modo edição: após ajustar, clique em "Salvar dispositivo" para confirmar.');
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    function excluirItem(id){
+      if(!confirm('Tem certeza que deseja excluir este cadastro?')) return;
+      state.itens = state.itens.filter(x=>x.id!==id);
+      // Remover reservas relacionadas
+      state.reservas = state.reservas.filter(r=>r.deviceId!==id);
+      save(); render(); notify('Cadastro excluído.');
+    }
+
+    function limparTudo(){
+      if(!confirm('Isso removerá TODOS os dados (cadastros e reservas). Continuar?')) return;
+      state.itens = []; state.reservas = []; save(); render(); notify('Dados limpos.');
+    }
+
+    /*** Reservas ***/
+    function abrirReserva(id){
+      const it = state.itens.find(x=>x.id===id); if(!it) return;
+      el.reservaDeviceId.value = id;
+      el.reservaProf.value = it.prof; // sugestão
+      el.reservaTurma.value = it.serie; // sugestão
+      el.reservaQtd.value = 1;
+      el.reservaData.valueAsDate = new Date();
+      el.modal.showModal();
+    }
+
+    function confirmarReserva(ev){
+      ev.preventDefault();
+      const id = el.reservaDeviceId.value;
+      const it = state.itens.find(x=>x.id===id); if(!it) return;
+      const qtd = Math.max(1, parseInt(el.reservaQtd.value,10)||1);
+      if(qtd > it.qtdDisp){ notify('Quantidade solicitada maior que a disponível.'); return; }
+      it.qtdDisp -= qtd;
+      state.reservas.push({ id: uid(), deviceId: id, prof: el.reservaProf.value.trim(), turma: el.reservaTurma.value.trim(), qtd, data: el.reservaData.value, status: 'ativa' });
+      save(); render(); el.modal.close(); notify('Reserva registrada!');
+      // Mostrar painel de reservas após confirmação
+      mostrarReservas();
+    }
+
+    function cancelarReserva(reservaId){
+      const r = state.reservas.find(x=>x.id===reservaId); if(!r) return;
+      const it = state.itens.find(x=>x.id===r.deviceId);
+      if(it){ it.qtdDisp += r.qtd; }
+      state.reservas = state.reservas.filter(x=>x.id!==reservaId);
+      save(); render(); notify('Reserva cancelada e itens devolvidos.');
+      mostrarReservas();
+    }
+
+    /*** Painel de reservas dinâmico ***/
+    function mostrarReservas(){
+      // se já existir painel, remove para recriar
+      document.getElementById('painelReservas')?.remove();
+      const sec = document.createElement('section'); sec.id = 'painelReservas'; sec.className = 'reveal'; sec.style.marginTop = '18px';
+      sec.innerHTML = `
+        <div class="card">
+          <div class="card-header"><h2>Reservas ativas</h2></div>
+          <div class="card-body">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Série</th>
+                    <th>Professor</th>
+                    <th>Qtd</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="reservasBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>`;
+      document.querySelector('main').appendChild(sec);
+
+      const body = sec.querySelector('#reservasBody');
+      const ativas = state.reservas.slice().sort((a,b)=> (a.data||'').localeCompare(b.data));
+      body.innerHTML = ativas.length ? ativas.map(r=>{
+        const it = state.itens.find(x=>x.id===r.deviceId);
+        return `<tr>
+          <td>${r.data||'-'}</td>
+          <td>${it? it.tipo : '-'}</td>
+          <td>${r.turma}</td>
+          <td>${r.prof}</td>
+          <td class="qty">${r.qtd}</td>
+          <td><button class="icon-btn" onclick="cancelarReserva('${r.id}')">↩️ Cancelar</button></td>
+        </tr>`
+      }).join('') : '<tr><td colspan="6" style="padding:14px">Sem reservas.</td></tr>';
+
+      // revelar com animação
+      requestAnimationFrame(()=>sec.classList.add('show'));
+    }
+
+    /*** Importar/Exportar ***/
+    function exportar(){
+      const payload = { itens: state.itens, reservas: state.reservas, exportadoEm: new Date().toISOString() };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'controle-dispositivos.json'; a.click();
+      URL.revokeObjectURL(url);
+    }
+    function importar(file){
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if(data.itens && data.reservas){ state.itens = data.itens; state.reservas = data.reservas; save(); render(); mostrarReservas(); notify('Importação concluída!'); }
+          else { notify('Arquivo inválido.'); }
+        } catch { notify('Falha ao ler o arquivo.'); }
+      };
+      reader.readAsText(file);
+    }
+
+    /*** UX: scroll + reveal ***/
+    const io = new IntersectionObserver((ents)=>{
+      ents.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('show'); io.unobserve(e.target);} });
+    }, {threshold: 0.1});
+
+    document.querySelectorAll('.reveal').forEach(el=> io.observe(el));
+
+    window.addEventListener('scroll', ()=>{
+      el.toTop.style.display = window.scrollY > 600 ? 'block' : 'none';
+    });
+
+    /*** Eventos ***/
+    el.form.addEventListener('submit', adicionar);
+    document.getElementById('limpar').addEventListener('click', ()=> el.form.reset());
+
+    el.busca.addEventListener('input', render);
+    el.filtroTipo.addEventListener('change', render);
+    el.ordenar.addEventListener('change', render);
+
+    document.getElementById('exportar').addEventListener('click', exportar);
+    document.getElementById('importar').addEventListener('change', (e)=> e.target.files[0] && importar(e.target.files[0]));
+
+    document.getElementById('confirmarReserva').addEventListener('click', confirmarReserva);
+
+    // Acesso global a algumas funcs usadas no HTML
+    window.abrirReserva = abrirReserva;
+    window.excluirItem = excluirItem;
+    window.editarItem = editarItem;
+    window.cancelarReserva = cancelarReserva;
+    window.limparTudo = limparTudo;
+
+    // Iniciar
+    load(); render(); mostrarReservas();
+  </script>
+</body>
+</html>
